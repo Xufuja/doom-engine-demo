@@ -1,9 +1,8 @@
 package dev.xfj;
 
 import dev.xfj.events.Event;
-import imgui.ImGui;
 
-public class ExampleLayer implements Layer {
+public class AppLayer implements Layer {
 
     @Override
     public void onAttach() {
@@ -22,11 +21,6 @@ public class ExampleLayer implements Layer {
 
     @Override
     public void onUIRender() {
-        ImGui.begin("Hello");
-        ImGui.button("Button");
-        ImGui.end();;
-
-        ImGui.showDemoWindow();
     }
 
     @Override

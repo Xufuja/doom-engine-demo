@@ -28,8 +28,6 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Application {
-    public static ImFont[] fonts;
-    private static int dockspace_flags;
     private static Application instance;
     private final ApplicationSpecification specification;
     private long windowHandle;
@@ -39,9 +37,6 @@ public class Application {
     private float frameTime;
     private float lastFrameTime;
     private LayerStack layerStack;
-    private Runnable menuBarCallback;
-    private final ImGuiImplGlfw imGuiGlfw;
-    private final ImGuiImplGl3 imGuiGl3;
     private EventCallBack.EventCallbackFn eventCallback;
 
     public Application(ApplicationSpecification specification) {
@@ -51,9 +46,6 @@ public class Application {
         this.frameTime = 0.0f;
         this.lastFrameTime = 0.0f;
         this.layerStack = new LayerStack();
-        this.imGuiGlfw = new ImGuiImplGlfw();
-        this.imGuiGl3 = new ImGuiImplGl3();
-        dockspace_flags = ImGuiDockNodeFlags.None;
         instance = this;
         init();
     }
@@ -163,36 +155,6 @@ public class Application {
 
         glfwMakeContextCurrent(windowHandle);
         GL.createCapabilities();
-
-        ImGui.createContext();
-        final ImGuiIO io = ImGui.getIO();
-        io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
-        //io.addConfigFlags(ImGuiConfigFlags.NavEnableGamepad);
-        io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
-        io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
-        //io.setConfigViewportsNoTaskBarIcon(true);
-        //io.setConfigViewportsNoAutoMerge(true);
-
-        ImGui.styleColorsDark();
-
-        ImGuiStyle imGuiStyle = ImGui.getStyle();
-        if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-            imGuiStyle.setWindowRounding(0.0f);
-            float[][] colors = imGuiStyle.getColors();
-            colors[ImGuiCol.WindowBg][3] = 1.0f;
-            imGuiStyle.setColors(colors);
-        }
-
-        final ImFontConfig fontConfig = new ImFontConfig();
-        fontConfig.setFontDataOwnedByAtlas(false);
-
-        fonts = new ImFont[]{
-                io.getFonts().addFontFromFileTTF("assets/fonts/roboto/Roboto-Regular.ttf", 20)
-        };
-        io.setFontDefault(fonts[0]);
-
-        imGuiGlfw.init(windowHandle, true);
-        imGuiGl3.init("#version 450");
     }
 
     public void run() {
@@ -207,57 +169,8 @@ public class Application {
 
             glfwSwapBuffers(windowHandle);
 
-            imGuiGl3.updateFontsTexture();
-            imGuiGlfw.newFrame();
-            ImGui.newFrame();
-
-            int window_flags = ImGuiWindowFlags.NoDocking;
-
-            if (menuBarCallback != null) {
-                window_flags |= ImGuiWindowFlags.MenuBar;
-            }
-
-            ImGuiViewport viewport = ImGui.getMainViewport();
-            ImGui.setNextWindowPos(viewport.getWorkPosX(), viewport.getWorkPosY());
-            ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
-            ImGui.setNextWindowViewport(viewport.getID());
-            ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
-            ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
-            window_flags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove;
-            window_flags |= ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
-
-
-            if ((dockspace_flags & ImGuiDockNodeFlags.PassthruCentralNode) != 0) {
-                window_flags |= ImGuiWindowFlags.NoBackground;
-            }
-
-            ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
-            ImGui.begin("DockSpace Demo", new ImBoolean(true), window_flags);
-            ImGui.popStyleVar();
-
-            ImGui.popStyleVar(2);
-
-            if (menuBarCallback != null) {
-                if (ImGui.beginMenuBar()) {
-                    menuBarCallback.run();
-                    ImGui.endMenuBar();
-                }
-            }
-
             for (Layer layer : layerStack.getLayers()) {
                 layer.onUIRender();
-            }
-
-            ImGui.end();
-
-            final ImGuiIO io = ImGui.getIO();
-            ImGui.render();
-            imGuiGl3.renderDrawData(ImGui.getDrawData());
-            if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-                long backupCurrentContext = glfwGetCurrentContext();
-                ImGui.updatePlatformWindows();
-                ImGui.renderPlatformWindowsDefault();
-                glfwMakeContextCurrent(backupCurrentContext);
             }
 
             float time = getTime();
@@ -296,10 +209,6 @@ public class Application {
 
     public float getTime() {
         return (float) glfwGetTime();
-    }
-
-    public void setMenuBarCallback(Runnable menuBarCallback) {
-        this.menuBarCallback = menuBarCallback;
     }
 
     public static Application getInstance() {

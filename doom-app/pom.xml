@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.xfj</groupId>
-    <artifactId>izanagi-app</artifactId>
+    <artifactId>doom-app</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>izanagi-core</artifactId>
+            <artifactId>doom-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
