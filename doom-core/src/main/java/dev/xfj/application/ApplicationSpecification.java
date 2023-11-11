@@ -2,6 +2,6 @@ package dev.xfj.application;
 
 public class ApplicationSpecification {
     public String name = "Izanagi App";
-    public int width = 1600;
-    public int height = 900;
+    public int width = Application.GL_SCREEN_WIDTH;
+    public int height = Application.GL_SCREEN_HEIGHT;
 }
