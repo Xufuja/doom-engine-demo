@@ -5,5 +5,5 @@ public class Player {
     public int y;
     public int z;
     public int angle;
-    public int upOrDown;
+    public int lookAngle;
 }
