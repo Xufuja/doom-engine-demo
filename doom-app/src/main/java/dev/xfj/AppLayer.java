@@ -420,9 +420,11 @@ public class AppLayer implements Layer {
         float da = y1;
         float db = y2;
         float d = da - db;
+
         if (d == 0) {
             d = 1;
         }
+
         float s = da / (da - db);
         x1 = (int) (x1 + s * (x2 - (x1)));
         y1 = (int) (y1 + s * (y2 - (y1)));

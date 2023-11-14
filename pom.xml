@@ -12,6 +12,7 @@
     <modules>
         <module>doom-core</module>
         <module>doom-app</module>
+        <module>grid-app</module>
     </modules>
 
 

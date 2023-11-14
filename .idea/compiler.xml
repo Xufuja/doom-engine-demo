@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="doom-app" />
         <module name="doom-core" />
+        <module name="grid-app" />
       </profile>
     </annotationProcessing>
   </component>
