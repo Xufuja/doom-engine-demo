@@ -21,7 +21,7 @@ public class Input {
         return state == GLFW_PRESS;
     }
 
-    public Vector2f getMousePosition() {
+    public static Vector2f getMousePosition() {
         long window = Application.getInstance().getWindowHandle();
         DoubleBuffer xPosition = BufferUtils.createDoubleBuffer(1);
         DoubleBuffer yPosition = BufferUtils.createDoubleBuffer(1);

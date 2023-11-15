@@ -53,6 +53,7 @@ public class AppLayer implements Layer {
             COS[x] = (float) cos(Math.toRadians(x));
             SIN[x] = (float) sin(Math.toRadians(x));
         }
+
         IntStream.range(0, walls.length).forEach(i -> walls[i] = new Wall());
         IntStream.range(0, sectors.length).forEach(i -> sectors[i] = new Sector());
     }
