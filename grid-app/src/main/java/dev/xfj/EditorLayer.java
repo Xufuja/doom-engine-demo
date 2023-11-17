@@ -1,9 +1,16 @@
 package dev.xfj;
 
 import dev.xfj.application.Application;
+import dev.xfj.events.Event;
+import dev.xfj.events.EventDispatcher;
+import dev.xfj.events.key.KeyPressedEvent;
+import dev.xfj.events.mouse.MouseButtonPressedEvent;
+import dev.xfj.events.mouse.MouseButtonReleasedEvent;
 import dev.xfj.input.Input;
 import dev.xfj.input.KeyCodes;
 import dev.xfj.input.MouseButtonCodes;
+import imgui.extension.imguizmo.ImGuizmo;
+import imgui.extension.imguizmo.flag.Operation;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -135,12 +142,20 @@ public class EditorLayer implements Layer {
         movePlayer();
         draw2D();
         darken();
-        mouse(0, 0, (int) Input.getMousePosition().x, (int) Input.getMousePosition().y);
 
     }
 
     @Override
     public void onUIRender() {
+
+    }
+
+    @Override
+    public void onEvent(Event event) {
+        EventDispatcher eventDispatcher = new EventDispatcher(event);
+        eventDispatcher.dispatch(KeyPressedEvent.class, this::onKeyPressed);
+        eventDispatcher.dispatch(MouseButtonPressedEvent.class, this::onMouseButtonPressed);
+        eventDispatcher.dispatch(MouseButtonReleasedEvent.class, this::onMouseButtonReleased);
 
     }
 
@@ -528,7 +543,22 @@ public class EditorLayer implements Layer {
         }
     }
 
-    private void mouse(int button, int state, int x, int y) {
+    private boolean onKeyPressed(KeyPressedEvent event) {
+        if (event.isRepeat()) {
+            return false;
+        }
+
+
+        switch (event.getKeyCode()) {
+
+        }
+        return false;
+    }
+
+    private boolean onMouseButtonPressed(MouseButtonPressedEvent event) {
+        int x = (int) Input.getMousePosition().x;
+        int y = (int) Input.getMousePosition().y;
+
         int s;
         int w;
         //round mouse x,y
@@ -537,7 +567,7 @@ public class EditorLayer implements Layer {
         grid.mx = ((grid.mx + 4) >> 3) << 3;
         grid.my = ((grid.my + 4) >> 3) << 3; //nearest 8th
 
-        if (Input.isMouseButtonDown(MouseButtonCodes.BUTTON_LEFT)) {
+        if (event.getMouseButton() == MouseButtonCodes.BUTTON_LEFT) {
             //2D view buttons only
             if (x > 580) {
                 //2d 3d view buttons
@@ -694,7 +724,7 @@ public class EditorLayer implements Layer {
                         initGlobals();
                     } //defaults
                 }
-                //select sector's walls 
+                //select sector's walls
                 int snw = sectors[grid.selS - 1].we - sectors[grid.selS - 1].ws; //sector's number of walls
                 if (y > 386 && y < 416) {
                     if (x < 610) //select sector wall left
@@ -771,13 +801,13 @@ public class EditorLayer implements Layer {
                         NUMBER_SECTORS -= 1;
                         grid.addSect = 0;
                         System.out.println("walls must be counter clockwise\n");
-                        return;
+                        return false;
                     }
 
                     //point 2
                     walls[NUMBER_WALLS - 1].x2 = grid.mx * grid.scale;
                     walls[NUMBER_WALLS - 1].y2 = grid.my * grid.scale; //x2,y2
-                    //automatic shading 
+                    //automatic shading
                     float ang = (float) Math.atan2(walls[NUMBER_WALLS - 1].y2 - walls[NUMBER_WALLS - 1].y1, walls[NUMBER_WALLS - 1].x2 - walls[NUMBER_WALLS - 1].x1);
                     ang = (float) ((ang * 180) / Math.PI);      //radians to degrees
                     if (ang < 0) {
@@ -822,8 +852,8 @@ public class EditorLayer implements Layer {
             grid.move[w] = -1;
         }
 
-        if (grid.addSect == 0 && Input.isMouseButtonDown(MouseButtonCodes.BUTTON_RIGHT)) {
-            //move point hold id 
+        if (grid.addSect == 0 && event.getMouseButton() == MouseButtonCodes.BUTTON_RIGHT) {
+            //move point hold id
             for (s = 0; s < NUMBER_SECTORS; s++) {
                 for (w = sectors[s].ws; w < sectors[s].we; w++) {
                     int x1 = walls[w].x1, y1 = walls[w].y1;
@@ -841,9 +871,15 @@ public class EditorLayer implements Layer {
             }
         }
 
-        //if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-        //    dark = 0;
-        //}
+
+        return false;
+    }
+
+    private boolean onMouseButtonReleased(MouseButtonReleasedEvent event) {
+        if (event.getMouseButton() == MouseButtonCodes.BUTTON_LEFT) {
+            dark = 0;
+        }
+        return false;
     }
 
     private static int[] loadArray(String path) {
