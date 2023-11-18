@@ -9,11 +9,10 @@ import dev.xfj.events.mouse.MouseButtonReleasedEvent;
 import dev.xfj.input.Input;
 import dev.xfj.input.KeyCodes;
 import dev.xfj.input.MouseButtonCodes;
-import imgui.extension.imguizmo.ImGuizmo;
-import imgui.extension.imguizmo.flag.Operation;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -502,7 +501,46 @@ public class EditorLayer implements Layer {
     }
 
     private void save() {
-        //todo
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append(NUMBER_SECTORS).append("\r\n");
+
+        for (int i = 0; i < NUMBER_SECTORS; i++) {
+            stringBuilder.append(sectors[i].ws).append(" ");
+            stringBuilder.append(sectors[i].we).append(" ");
+            stringBuilder.append(sectors[i].z1).append(" ");
+            stringBuilder.append(sectors[i].z2).append(" ");
+            stringBuilder.append(sectors[i].st).append(" ");
+            stringBuilder.append(sectors[i].ss);
+            stringBuilder.append("\r\n");
+        }
+
+        stringBuilder.append(NUMBER_WALLS).append("\r\n");
+
+        for (int i = 0; i < NUMBER_WALLS; i++) {
+            stringBuilder.append(walls[i].x1).append(" ");
+            stringBuilder.append(walls[i].y1).append(" ");
+            stringBuilder.append(walls[i].x2).append(" ");
+            stringBuilder.append(walls[i].y2).append(" ");
+            stringBuilder.append(walls[i].wt).append(" ");
+            stringBuilder.append(walls[i].u).append(" ");
+            stringBuilder.append(walls[i].v).append(" ");
+            stringBuilder.append(walls[i].shade);
+            stringBuilder.append("\r\n");
+        }
+        stringBuilder.append("\r\n");
+
+        stringBuilder.append(player.x).append(" ");
+        stringBuilder.append(player.y).append(" ");
+        stringBuilder.append(player.z).append(" ");
+        stringBuilder.append(player.angle).append(" ");
+        stringBuilder.append(player.lookAngle);
+
+        try {
+            Files.writeString(Path.of("level.h"), stringBuilder, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private void load() {
@@ -523,7 +561,7 @@ public class EditorLayer implements Layer {
             NUMBER_WALLS = Integer.parseInt(lines.get(NUMBER_SECTORS + 1));
 
             for (int i = 0; i < NUMBER_WALLS; i++) {
-                String[] line = lines.get(i + 1).split(" ");
+                String[] line = lines.get(i + NUMBER_SECTORS + 2).split(" ");
                 walls[i].x1 = Integer.parseInt(line[0]);
                 walls[i].y1 = Integer.parseInt(line[1]);
                 walls[i].x2 = Integer.parseInt(line[2]);
@@ -531,8 +569,10 @@ public class EditorLayer implements Layer {
                 walls[i].wt = Integer.parseInt(line[4]);
                 walls[i].u = Integer.parseInt(line[5]);
                 walls[i].v = Integer.parseInt(line[6]);
+                walls[i].shade = Integer.parseInt(line[7]);
+
             }
-            String[] playerData = lines.get(NUMBER_SECTORS + NUMBER_WALLS + 1).split(" ");
+            String[] playerData = lines.get(NUMBER_SECTORS + NUMBER_WALLS + 3).split(" ");
             player.x = Integer.parseInt(playerData[0]);
             player.y = Integer.parseInt(playerData[1]);
             player.z = Integer.parseInt(playerData[2]);
@@ -724,6 +764,7 @@ public class EditorLayer implements Layer {
                         initGlobals();
                     } //defaults
                 }
+
                 //select sector's walls
                 int snw = sectors[grid.selS - 1].we - sectors[grid.selS - 1].ws; //sector's number of walls
                 if (y > 386 && y < 416) {
