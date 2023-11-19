@@ -152,7 +152,6 @@ public class EditorLayer implements Layer {
     @Override
     public void onEvent(Event event) {
         EventDispatcher eventDispatcher = new EventDispatcher(event);
-        eventDispatcher.dispatch(KeyPressedEvent.class, this::onKeyPressed);
         eventDispatcher.dispatch(MouseButtonPressedEvent.class, this::onMouseButtonPressed);
         eventDispatcher.dispatch(MouseButtonReleasedEvent.class, this::onMouseButtonReleased);
 
@@ -581,18 +580,6 @@ public class EditorLayer implements Layer {
         } catch (Exception e) {
             throw new RuntimeException();
         }
-    }
-
-    private boolean onKeyPressed(KeyPressedEvent event) {
-        if (event.isRepeat()) {
-            return false;
-        }
-
-
-        switch (event.getKeyCode()) {
-
-        }
-        return false;
     }
 
     private boolean onMouseButtonPressed(MouseButtonPressedEvent event) {
