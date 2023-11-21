@@ -1,6 +1,7 @@
 package dev.xfj;
 
 import dev.xfj.application.Application;
+import dev.xfj.events.Event;
 import dev.xfj.input.Input;
 import dev.xfj.input.KeyCodes;
 
@@ -112,6 +113,11 @@ public class AppLayer implements Layer {
 
     @Override
     public void onUIRender() {
+    }
+
+    @Override
+    public void onEvent(Event event) {
+
     }
 
     private void drawPixel(int x, int y, int color) {

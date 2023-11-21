@@ -5,6 +5,7 @@ import dev.xfj.events.Event;
 import dev.xfj.events.EventDispatcher;
 import dev.xfj.events.mouse.MouseButtonPressedEvent;
 import dev.xfj.events.mouse.MouseButtonReleasedEvent;
+import dev.xfj.events.mouse.MouseMovedEvent;
 import dev.xfj.input.Input;
 import dev.xfj.input.KeyCodes;
 import dev.xfj.input.MouseButtonCodes;
@@ -153,7 +154,7 @@ public class EditorLayer implements Layer {
         EventDispatcher eventDispatcher = new EventDispatcher(event);
         eventDispatcher.dispatch(MouseButtonPressedEvent.class, this::onMouseButtonPressed);
         eventDispatcher.dispatch(MouseButtonReleasedEvent.class, this::onMouseButtonReleased);
-
+        eventDispatcher.dispatch(MouseMovedEvent.class, this::onMouseMoved);
     }
 
     private void initGlobals()           //define grid globals
@@ -746,6 +747,7 @@ public class EditorLayer implements Layer {
                     grid.wt = WALLS[SECTORS[s].ws].wt;
                     grid.wu = WALLS[SECTORS[s].ws].u;
                     grid.wv = WALLS[SECTORS[s].ws].v;
+                    
                     if (grid.selS == 0) {
                         initGlobals();
                     } //defaults
@@ -905,6 +907,39 @@ public class EditorLayer implements Layer {
     private boolean onMouseButtonReleased(MouseButtonReleasedEvent event) {
         if (event.getMouseButton() == MouseButtonCodes.BUTTON_LEFT) {
             dark = 0;
+        }
+        return false;
+    }
+
+    private boolean onMouseMoved(MouseMovedEvent event) {
+        int x = (int) event.getX();
+        int y = (int) event.getY();
+
+        if (x < 580 && grid.addSect == 0 && grid.move[0] > -1) {
+            int Aw = grid.move[0];
+            int Ax = grid.move[1];
+            int Bw = grid.move[2];
+            int Bx = grid.move[3];
+
+            if (Ax == 1) {
+                WALLS[Aw].x1 = ((x + 16) >> 5) << 5;
+                WALLS[Aw].y1 = ((Application.GL_SCREEN_HEIGHT - y + 16) >> 5) << 5;
+            }
+
+            if (Ax == 2) {
+                WALLS[Aw].x2 = ((x + 16) >> 5) << 5;
+                WALLS[Aw].y2 = ((Application.GL_SCREEN_HEIGHT - y + 16) >> 5) << 5;
+            }
+
+            if (Bx == 1) {
+                WALLS[Bw].x1 = ((x + 16) >> 5) << 5;
+                WALLS[Bw].y1 = ((Application.GL_SCREEN_HEIGHT - y + 16) >> 5) << 5;
+            }
+
+            if (Bx == 2) {
+                WALLS[Bw].x2 = ((x + 16) >> 5) << 5;
+                WALLS[Bw].y2 = ((Application.GL_SCREEN_HEIGHT - y + 16) >> 5) << 5;
+            }
         }
         return false;
     }
