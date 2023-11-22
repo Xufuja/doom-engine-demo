@@ -2,9 +2,14 @@ package dev.xfj;
 
 import dev.xfj.application.Application;
 import dev.xfj.events.Event;
+import dev.xfj.events.EventDispatcher;
+import dev.xfj.events.key.KeyPressedEvent;
 import dev.xfj.input.Input;
 import dev.xfj.input.KeyCodes;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static dev.xfj.application.Application.*;
@@ -15,37 +20,11 @@ import static org.lwjgl.opengl.GL41.*;
 public class AppLayer implements Layer {
     private static final float[] COS = new float[360];
     private static final float[] SIN = new float[360];
-    private static final Wall[] walls = new Wall[30];
-    private static final Sector[] sectors = new Sector[30];
-    private static final int NUMBER_SECTORS = 4;
-    private static final int NUMBER_WALLS = 16;
-    private static final int[] LOAD_SECTORS = {
-            0, 4, 0, 40, 2, 3,
-            4, 8, 0, 40, 4, 5,
-            8, 12, 0, 40, 6, 7,
-            12, 16, 0, 40, 0, 1
-    };
-    private static final int[] LOAD_WALLS = {
-            0, 0, 32, 0, 0,
-            32, 0, 32, 32, 1,
-            32, 32, 0, 32, 0,
-            0, 32, 0, 0, 1,
-
-            64, 0, 96, 0, 2,
-            96, 0, 96, 32, 3,
-            96, 32, 64, 32, 2,
-            64, 32, 64, 0, 3,
-
-            64, 64, 96, 64, 4,
-            96, 64, 96, 96, 5,
-            96, 96, 64, 96, 4,
-            64, 96, 64, 64, 5,
-
-            0, 64, 32, 64, 6,
-            32, 64, 32, 96, 7,
-            32, 96, 0, 96, 6,
-            0, 96, 0, 64, 7,
-    };
+    private static final Wall[] WALLS = new Wall[256];
+    private static final Sector[] SECTORS = new Sector[128];
+    private static final Texture[] TEXTURES = new Texture[64];
+    private static int numberSectors = 4;
+    private static int numberWalls = 16;
 
     private Player player;
 
@@ -55,8 +34,8 @@ public class AppLayer implements Layer {
             SIN[x] = (float) sin(Math.toRadians(x));
         }
 
-        IntStream.range(0, walls.length).forEach(i -> walls[i] = new Wall());
-        IntStream.range(0, sectors.length).forEach(i -> sectors[i] = new Sector());
+        IntStream.range(0, WALLS.length).forEach(i -> WALLS[i] = new Wall());
+        IntStream.range(0, SECTORS.length).forEach(i -> SECTORS[i] = new Sector());
     }
 
     @Override
@@ -76,24 +55,6 @@ public class AppLayer implements Layer {
         int v1 = 0;
         int v2 = 0;
 
-        for (s = 0; s < NUMBER_SECTORS; s++) {
-            sectors[s].wallStart = LOAD_SECTORS[v1 + 0];
-            sectors[s].wallEnd = LOAD_SECTORS[v1 + 1];
-            sectors[s].z1 = LOAD_SECTORS[v1 + 2];
-            sectors[s].z2 = LOAD_SECTORS[v1 + 3] - LOAD_SECTORS[v1 + 2];
-            sectors[s].colorBottom = LOAD_SECTORS[v1 + 4];
-            sectors[s].colorTop = LOAD_SECTORS[v1 + 5];
-            v1 += 6;
-
-            for (w = sectors[s].wallStart; w < sectors[s].wallEnd; w++) {
-                walls[w].x1 = LOAD_WALLS[v2 + 0];
-                walls[w].y1 = LOAD_WALLS[v2 + 1];
-                walls[w].x2 = LOAD_WALLS[v2 + 2];
-                walls[w].y2 = LOAD_WALLS[v2 + 3];
-                walls[w].c = LOAD_WALLS[v2 + 4];
-                v2 += 5;
-            }
-        }
     }
 
     @Override
@@ -117,7 +78,48 @@ public class AppLayer implements Layer {
 
     @Override
     public void onEvent(Event event) {
+        EventDispatcher eventDispatcher = new EventDispatcher(event);
+        eventDispatcher.dispatch(KeyPressedEvent.class, this::onKeyPressed);
+    }
 
+    private void load() {
+        try {
+            List<String> lines = Files.readAllLines(Path.of("level.h"));
+            numberSectors = Integer.parseInt(lines.get(0));
+
+            for (int i = 0; i < numberSectors; i++) {
+                String[] line = lines.get(i + 1).split(" ");
+                SECTORS[i].wallStart = Integer.parseInt(line[0]);
+                SECTORS[i].wallEnd = Integer.parseInt(line[1]);
+                SECTORS[i].z1 = Integer.parseInt(line[2]);
+                SECTORS[i].z2 = Integer.parseInt(line[3]);
+                SECTORS[i].st = Integer.parseInt(line[4]);
+                SECTORS[i].ss = Integer.parseInt(line[5]);
+            }
+
+            numberWalls = Integer.parseInt(lines.get(numberSectors + 1));
+
+            for (int i = 0; i < numberWalls; i++) {
+                String[] line = lines.get(i + numberSectors + 2).split(" ");
+                WALLS[i].x1 = Integer.parseInt(line[0]);
+                WALLS[i].y1 = Integer.parseInt(line[1]);
+                WALLS[i].x2 = Integer.parseInt(line[2]);
+                WALLS[i].y2 = Integer.parseInt(line[3]);
+                WALLS[i].wt = Integer.parseInt(line[4]);
+                WALLS[i].u = Integer.parseInt(line[5]);
+                WALLS[i].v = Integer.parseInt(line[6]);
+                WALLS[i].shade = Integer.parseInt(line[7]);
+
+            }
+            String[] playerData = lines.get(numberSectors + numberWalls + 3).split(" ");
+            player.x = Integer.parseInt(playerData[0]);
+            player.y = Integer.parseInt(playerData[1]);
+            player.z = Integer.parseInt(playerData[2]);
+            player.angle = Integer.parseInt(playerData[3]);
+            player.lookAngle = Integer.parseInt(playerData[4]);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 
     private void drawPixel(int x, int y, int color) {
@@ -246,32 +248,32 @@ public class AppLayer implements Layer {
         float cos = COS[player.angle];
         float sin = SIN[player.angle];
 
-        for (s = 0; s < NUMBER_SECTORS - 1; s++) {
-            for (w = 0; w < NUMBER_SECTORS - s - 1; w++) {
-                if (sectors[w].distance < sectors[w + 1].distance) {
-                    Sector st = sectors[w];
-                    sectors[w] = sectors[w + 1];
-                    sectors[w + 1] = st;
+        for (s = 0; s < numberSectors - 1; s++) {
+            for (w = 0; w < numberSectors - s - 1; w++) {
+                if (SECTORS[w].distance < SECTORS[w + 1].distance) {
+                    Sector st = SECTORS[w];
+                    SECTORS[w] = SECTORS[w + 1];
+                    SECTORS[w + 1] = st;
                 }
             }
         }
 
-        for (s = 0; s < NUMBER_SECTORS; s++) {
-            sectors[s].distance = 0;
-            if (player.z < sectors[s].z1) {
-                sectors[s].surface = 1;
-            } else if (player.z > sectors[s].z2) {
-                sectors[s].surface = 2;
+        for (s = 0; s < numberSectors; s++) {
+            SECTORS[s].distance = 0;
+            if (player.z < SECTORS[s].z1) {
+                SECTORS[s].surface = 1;
+            } else if (player.z > SECTORS[s].z2) {
+                SECTORS[s].surface = 2;
             } else {
-                sectors[s].surface = 0;
+                SECTORS[s].surface = 0;
             }
 
             for (loop = 0; loop < 2; loop++) {
-                for (w = sectors[s].wallStart; w < sectors[s].wallEnd; w++) {
-                    int x1 = walls[w].x1 - player.x;
-                    int y1 = walls[w].y1 - player.y;
-                    int x2 = walls[w].x2 - player.x;
-                    int y2 = walls[w].y2 - player.y;
+                for (w = SECTORS[s].wallStart; w < SECTORS[s].wallEnd; w++) {
+                    int x1 = WALLS[w].x1 - player.x;
+                    int y1 = WALLS[w].y1 - player.y;
+                    int x2 = WALLS[w].x2 - player.x;
+                    int y2 = WALLS[w].y2 - player.y;
                     if (loop == 0) {
                         int swp = x1;
                         x1 = x2;
@@ -291,12 +293,12 @@ public class AppLayer implements Layer {
                     worldY[2] = worldY[0];
                     worldY[3] = worldY[1];
 
-                    sectors[s].distance += distance(0, 0, (worldX[0] + worldX[1]) / 2, (worldY[0] + worldY[1]) / 2);
+                    SECTORS[s].distance += distance(0, 0, (worldX[0] + worldX[1]) / 2, (worldY[0] + worldY[1]) / 2);
 
-                    worldZ[0] = (int) (sectors[s].z1 - player.z + ((player.lookAngle * worldY[0])) / 32.0f);
-                    worldZ[1] = (int) (sectors[s].z1 - player.z + ((player.lookAngle * worldY[1])) / 32.0f);
-                    worldZ[2] = worldZ[0] + sectors[s].z2;
-                    worldZ[3] = worldZ[1] + sectors[s].z2;
+                    worldZ[0] = (int) (SECTORS[s].z1 - player.z + ((player.lookAngle * worldY[0])) / 32.0f);
+                    worldZ[1] = (int) (SECTORS[s].z1 - player.z + ((player.lookAngle * worldY[1])) / 32.0f);
+                    worldZ[2] = (int) (SECTORS[s].z2 - player.z + ((player.lookAngle * worldY[0])) / 32.0f);
+                    worldZ[3] = (int) (SECTORS[s].z2 - player.z + ((player.lookAngle * worldY[1])) / 32.0f);
 
                     if (worldY[0] < 1 && worldY[1] < 1) {
                         continue;
@@ -338,10 +340,12 @@ public class AppLayer implements Layer {
                     worldX[3] = worldX[3] * 200 / worldY[3] + SCREEN_WIDTH_HALF;
                     worldY[3] = worldZ[3] * 200 / worldY[3] + SCREEN_HEIGHT_HALF;
 
-                    drawWall(worldX[0], worldX[1], worldY[0], worldY[1], worldY[2], worldY[3], walls[w].c, s);
+                    drawWall(worldX[0], worldX[1], worldY[0], worldY[1], worldY[2], worldY[3], WALLS[w].c, s);
                 }
-                sectors[s].distance /= (sectors[s].wallEnd - sectors[s].wallStart);
-                sectors[s].surface *= -1;
+                if ((SECTORS[s].wallEnd - SECTORS[s].wallStart) != 0) {
+                    SECTORS[s].distance /= (SECTORS[s].wallEnd - SECTORS[s].wallStart);
+                    SECTORS[s].surface *= -1;
+                }
             }
         }
     }
@@ -395,25 +399,25 @@ public class AppLayer implements Layer {
                 y2 = SCREEN_WIDTH - 1;
             }
 
-            if (sectors[s].surface == 1) {
-                sectors[s].surf[x] = y1;
+            if (SECTORS[s].surface == 1) {
+                SECTORS[s].surf[x] = y1;
                 continue;
             }
 
-            if (sectors[s].surface == 2) {
-                sectors[s].surf[x] = y2;
+            if (SECTORS[s].surface == 2) {
+                SECTORS[s].surf[x] = y2;
                 continue;
             }
 
-            if (sectors[s].surface == -1) {
-                for (y = sectors[s].surf[x]; y < y1; y++) {
-                    drawPixel(x, y, sectors[s].colorBottom);
+            if (SECTORS[s].surface == -1) {
+                for (y = SECTORS[s].surf[x]; y < y1; y++) {
+                    drawPixel(x, y, SECTORS[s].colorBottom);
                 }
             }
 
-            if (sectors[s].surface == -2) {
-                for (y = y2; y < sectors[s].surf[x]; y++) {
-                    drawPixel(x, y, sectors[s].colorTop);
+            if (SECTORS[s].surface == -2) {
+                for (y = y2; y < SECTORS[s].surf[x]; y++) {
+                    drawPixel(x, y, SECTORS[s].colorTop);
                 }
             }
 
@@ -447,6 +451,13 @@ public class AppLayer implements Layer {
 
     private int distance(int x1, int y1, int x2, int y2) {
         return (int) Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    private boolean onKeyPressed(KeyPressedEvent event) {
+        if (event.getKeyCode() == KeyCodes.ENTER) {
+           load();
+        }
+        return false;
     }
 
 }

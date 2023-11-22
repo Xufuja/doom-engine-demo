@@ -747,7 +747,7 @@ public class EditorLayer implements Layer {
                     grid.wt = WALLS[SECTORS[s].ws].wt;
                     grid.wu = WALLS[SECTORS[s].ws].u;
                     grid.wv = WALLS[SECTORS[s].ws].v;
-                    
+
                     if (grid.selS == 0) {
                         initGlobals();
                     } //defaults
@@ -914,6 +914,8 @@ public class EditorLayer implements Layer {
     private boolean onMouseMoved(MouseMovedEvent event) {
         int x = (int) event.getX();
         int y = (int) event.getY();
+
+        System.out.println(x + " " + y);
 
         if (x < 580 && grid.addSect == 0 && grid.move[0] > -1) {
             int Aw = grid.move[0];

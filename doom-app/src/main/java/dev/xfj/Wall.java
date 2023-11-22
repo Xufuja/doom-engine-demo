@@ -6,4 +6,8 @@ public class Wall {
     public int x2;
     public int y2;
     public int c;
+    public int wt;
+    public int u;
+    public int v;
+    public int shade;
 }

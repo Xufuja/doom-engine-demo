@@ -10,6 +10,8 @@ public class Sector {
     public int distance;
     public int colorBottom;
     public int colorTop;
+    public int st;
+    public int ss;
     public int[] surf = new int[SCREEN_WIDTH];
     public int surface;
 }
