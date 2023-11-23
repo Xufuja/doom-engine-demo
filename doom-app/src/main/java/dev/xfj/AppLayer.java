@@ -36,6 +36,7 @@ public class AppLayer implements Layer {
 
         IntStream.range(0, WALLS.length).forEach(i -> WALLS[i] = new Wall());
         IntStream.range(0, SECTORS.length).forEach(i -> SECTORS[i] = new Sector());
+        IntStream.range(0, TEXTURES.length).forEach(i -> TEXTURES[i] = new Texture());
     }
 
     @Override
@@ -50,11 +51,66 @@ public class AppLayer implements Layer {
         player.angle = 0;
         player.lookAngle = 0;
 
-        int s;
-        int w;
-        int v1 = 0;
-        int v2 = 0;
-
+        TEXTURES[0].name = loadArray("textures\\t00.txt");
+        TEXTURES[0].h = 16;
+        TEXTURES[0].w = 16;
+        TEXTURES[1].name = loadArray("textures\\t01.txt");
+        TEXTURES[1].h = 16;
+        TEXTURES[1].w = 16;
+        TEXTURES[2].name = loadArray("textures\\t02.txt");
+        TEXTURES[2].h = 16;
+        TEXTURES[2].w = 16;
+        TEXTURES[3].name = loadArray("textures\\t03.txt");
+        TEXTURES[3].h = 16;
+        TEXTURES[3].w = 16;
+        TEXTURES[4].name = loadArray("textures\\t04.txt");
+        TEXTURES[4].h = 16;
+        TEXTURES[4].w = 16;
+        TEXTURES[5].name = loadArray("textures\\t05.txt");
+        TEXTURES[5].h = 16;
+        TEXTURES[5].w = 16;
+        TEXTURES[6].name = loadArray("textures\\t06.txt");
+        TEXTURES[6].h = 16;
+        TEXTURES[6].w = 16;
+        TEXTURES[7].name = loadArray("textures\\t07.txt");
+        TEXTURES[7].h = 16;
+        TEXTURES[7].w = 16;
+        TEXTURES[8].name = loadArray("textures\\t08.txt");
+        TEXTURES[8].h = 32;
+        TEXTURES[8].w = 32;
+        TEXTURES[9].name = loadArray("textures\\t09.txt");
+        TEXTURES[9].h = 64;
+        TEXTURES[9].w = 64;
+        TEXTURES[10].name = loadArray("textures\\t10.txt");
+        TEXTURES[10].h = 16;
+        TEXTURES[10].w = 16;
+        TEXTURES[11].name = loadArray("textures\\t11.txt");
+        TEXTURES[11].h = 16;
+        TEXTURES[11].w = 16;
+        TEXTURES[12].name = loadArray("textures\\t12.txt");
+        TEXTURES[12].h = 16;
+        TEXTURES[12].w = 16;
+        TEXTURES[13].name = loadArray("textures\\t13.txt");
+        TEXTURES[13].h = 16;
+        TEXTURES[13].w = 16;
+        TEXTURES[14].name = loadArray("textures\\t14.txt");
+        TEXTURES[14].h = 16;
+        TEXTURES[14].w = 16;
+        TEXTURES[15].name = loadArray("textures\\t15.txt");
+        TEXTURES[15].h = 16;
+        TEXTURES[15].w = 16;
+        TEXTURES[16].name = loadArray("textures\\t16.txt");
+        TEXTURES[16].h = 16;
+        TEXTURES[16].w = 16;
+        TEXTURES[17].name = loadArray("textures\\t17.txt");
+        TEXTURES[17].h = 16;
+        TEXTURES[17].w = 16;
+        TEXTURES[18].name = loadArray("textures\\t18.txt");
+        TEXTURES[18].h = 16;
+        TEXTURES[18].w = 16;
+        TEXTURES[19].name = loadArray("textures\\t19.txt");
+        TEXTURES[19].h = 16;
+        TEXTURES[19].w = 16;
     }
 
     @Override
@@ -69,6 +125,7 @@ public class AppLayer implements Layer {
 
         clearBackground();
         movePlayer();
+        //testTextures();
         draw3D();
     }
 
@@ -122,54 +179,8 @@ public class AppLayer implements Layer {
         }
     }
 
-    private void drawPixel(int x, int y, int color) {
-        int[] rgb = new int[3];
-        if (color == 0) {
-            rgb[0] = 255;
-            rgb[1] = 255;
-            rgb[2] = 0;
-        } //Yellow
-        if (color == 1) {
-            rgb[0] = 160;
-            rgb[1] = 160;
-            rgb[2] = 0;
-        } //Yellow darker
-        if (color == 2) {
-            rgb[0] = 0;
-            rgb[1] = 255;
-            rgb[2] = 0;
-        } //Green
-        if (color == 3) {
-            rgb[0] = 0;
-            rgb[1] = 160;
-            rgb[2] = 0;
-        } //Green darker
-        if (color == 4) {
-            rgb[0] = 0;
-            rgb[1] = 255;
-            rgb[2] = 255;
-        } //Cyan
-        if (color == 5) {
-            rgb[0] = 0;
-            rgb[1] = 160;
-            rgb[2] = 160;
-        } //Cyan darker
-        if (color == 6) {
-            rgb[0] = 160;
-            rgb[1] = 100;
-            rgb[2] = 0;
-        } //brown
-        if (color == 7) {
-            rgb[0] = 110;
-            rgb[1] = 50;
-            rgb[2] = 0;
-        } //brown darker
-        if (color == 8) {
-            rgb[0] = 0;
-            rgb[1] = 60;
-            rgb[2] = 130;
-        } //background
-        glColor3ub((byte) rgb[0], (byte) rgb[1], (byte) rgb[2]);
+    private void drawPixel(int x, int y, int r, int g, int b) {
+        glColor3ub((byte) r, (byte) g, (byte) b);
         glBegin(GL_POINTS);
         glVertex2i(x * PIXEL_SCALE + 2, y * PIXEL_SCALE + 2);
         glEnd();
@@ -232,15 +243,17 @@ public class AppLayer implements Layer {
 
         for (y = 0; y < SCREEN_HEIGHT; y++) {
             for (x = 0; x < SCREEN_WIDTH; x++) {
-                drawPixel(x, y, 8);
+                drawPixel(x, y, 0, 60, 130);
             } //clear background color
         }
     }
 
     private void draw3D() {
+        int x;
         int s;
         int w;
-        int loop;
+        int frontBack;
+        int cycles;
         int[] worldX = new int[4];
         int[] worldY = new int[4];
         int[] worldZ = new int[4];
@@ -262,19 +275,31 @@ public class AppLayer implements Layer {
             SECTORS[s].distance = 0;
             if (player.z < SECTORS[s].z1) {
                 SECTORS[s].surface = 1;
+                cycles = 2;
+
+                for (x = 0; x < SCREEN_WIDTH; x++) {
+                    SECTORS[s].surf[x] = SCREEN_HEIGHT;
+                }
             } else if (player.z > SECTORS[s].z2) {
                 SECTORS[s].surface = 2;
+                cycles = 2;
+
+                for (x = 0; x < SCREEN_WIDTH; x++) {
+                    SECTORS[s].surf[x] = 0;
+                }
             } else {
                 SECTORS[s].surface = 0;
+                cycles = 1;
             }
 
-            for (loop = 0; loop < 2; loop++) {
+            for (frontBack = 0; frontBack < cycles; frontBack++) {
                 for (w = SECTORS[s].wallStart; w < SECTORS[s].wallEnd; w++) {
                     int x1 = WALLS[w].x1 - player.x;
                     int y1 = WALLS[w].y1 - player.y;
                     int x2 = WALLS[w].x2 - player.x;
                     int y2 = WALLS[w].y2 - player.y;
-                    if (loop == 0) {
+
+                    if (frontBack == 1) {
                         int swp = x1;
                         x1 = x2;
                         x2 = swp;
@@ -340,19 +365,24 @@ public class AppLayer implements Layer {
                     worldX[3] = worldX[3] * 200 / worldY[3] + SCREEN_WIDTH_HALF;
                     worldY[3] = worldZ[3] * 200 / worldY[3] + SCREEN_HEIGHT_HALF;
 
-                    drawWall(worldX[0], worldX[1], worldY[0], worldY[1], worldY[2], worldY[3], WALLS[w].c, s);
+                    drawWall(worldX[0], worldX[1], worldY[0], worldY[1], worldY[2], worldY[3], s, w, frontBack);
                 }
+
                 if ((SECTORS[s].wallEnd - SECTORS[s].wallStart) != 0) {
                     SECTORS[s].distance /= (SECTORS[s].wallEnd - SECTORS[s].wallStart);
-                    SECTORS[s].surface *= -1;
                 }
             }
         }
     }
 
-    private void drawWall(int x1, int x2, int b1, int b2, int t1, int t2, int c, int s) {
+    private void drawWall(int x1, int x2, int b1, int b2, int t1, int t2, int s, int w, int frontBack) {
         int x;
         int y;
+
+        int wt = WALLS[w].wt;
+        float ht = 0;
+        float htStep = (float) TEXTURES[wt].w / (float) (x2 - x1);
+
         int dyb = b2 - b1;
         int dyt = t2 - t1;
         int dx = x2 - x1;
@@ -363,66 +393,82 @@ public class AppLayer implements Layer {
 
         int xs = x1;
 
-        if (x1 < 1) {
-            x1 = 1;
+        if (x1 < 0) {
+            ht -= htStep * x1;
+            x1 = 0;
         }
 
-        if (x2 < 1) {
-            x2 = 1;
+        if (x2 < 0) {
+            x2 = 0;
         }
 
-        if (x1 > SCREEN_WIDTH - 1) {
-            x1 = SCREEN_WIDTH - 1;
+        if (x1 > SCREEN_WIDTH) {
+            x1 = SCREEN_WIDTH;
         }
 
-        if (x2 > SCREEN_WIDTH - 1) {
-            x2 = SCREEN_WIDTH - 1;
+        if (x2 > SCREEN_WIDTH) {
+            x2 = SCREEN_WIDTH;
         }
 
         for (x = x1; x < x2; x++) {
             int y1 = (int) (dyb * (x - xs + 0.5f) / dx + b1);
             int y2 = (int) (dyt * (x - xs + 0.5f) / dx + t1);
 
-            if (y1 < 1) {
-                y1 = 1;
+            float vt = 0;
+            float vtStep = (float) TEXTURES[wt].h / (float) (y2 - y1);
+
+            if (y1 < 0) {
+                vt -= vtStep * y1;
+                y1 = 0;
             }
 
-            if (y2 < 1) {
-                y2 = 1;
+            if (y2 < 0) {
+                y2 = 0;
             }
 
-            if (y1 > SCREEN_WIDTH - 1) {
-                y1 = SCREEN_WIDTH - 1;
+            if (y1 > SCREEN_HEIGHT) {
+                y1 = SCREEN_HEIGHT;
             }
 
-            if (y2 > SCREEN_WIDTH - 1) {
-                y2 = SCREEN_WIDTH - 1;
+            if (y2 > SCREEN_HEIGHT) {
+                y2 = SCREEN_HEIGHT;
             }
 
-            if (SECTORS[s].surface == 1) {
-                SECTORS[s].surf[x] = y1;
-                continue;
-            }
-
-            if (SECTORS[s].surface == 2) {
-                SECTORS[s].surf[x] = y2;
-                continue;
-            }
-
-            if (SECTORS[s].surface == -1) {
-                for (y = SECTORS[s].surf[x]; y < y1; y++) {
-                    drawPixel(x, y, SECTORS[s].colorBottom);
+            if (frontBack == 0) {
+                if (SECTORS[s].surface == 1) {
+                    SECTORS[s].surf[x] = y1;
                 }
-            }
 
-            if (SECTORS[s].surface == -2) {
-                for (y = y2; y < SECTORS[s].surf[x]; y++) {
-                    drawPixel(x, y, SECTORS[s].colorTop);
+                if (SECTORS[s].surface == 2) {
+                    SECTORS[s].surf[x] = y2;
                 }
+
+                for (y = y1; y < y2; y++) {
+                    int pixel = (int) (TEXTURES[wt].h - vt - 1) * 3 * TEXTURES[wt].w + (int) ht * 3;
+
+                    int r = TEXTURES[wt].name[pixel + 0];
+                    int g = TEXTURES[wt].name[pixel + 1];
+                    int b = TEXTURES[wt].name[pixel + 2];
+
+                    drawPixel(x, y, r, g, b);
+                    vt += vtStep;
+
+                }
+                ht += htStep;
             }
 
-            for (y = y1; y < y2; y++) {
-                drawPixel(x, y, c);
+            if (frontBack == 1) {
+                if (SECTORS[s].surface == 1) {
+                    y2 = SECTORS[s].surf[x];
+                }
+
+                if (SECTORS[s].surface == 2) {
+                    y1 = SECTORS[s].surf[x];
+                }
+
+                for (y = y1; y < y2; y++) {
+                    drawPixel(x, y, 255, 0, 0);
+                }
             }
         }
     }
@@ -449,15 +495,39 @@ public class AppLayer implements Layer {
         return new int[]{x1, y1, z1};
     }
 
+    private void testTextures() {
+        int x;
+        int y;
+        int t = 4;
+
+        for (y = 0; y < TEXTURES[t].h; y++) {
+            for (x = 0; x < TEXTURES[t].w; x++) {
+                int pixel = (TEXTURES[t].h - y - 1) * 3 * TEXTURES[t].w + x * 3;
+                int r = TEXTURES[t].name[pixel + 0];
+                int g = TEXTURES[t].name[pixel + 1];
+                int b = TEXTURES[t].name[pixel + 2];
+                drawPixel(x, y, r, g, b);
+            }
+        }
+    }
+
     private int distance(int x1, int y1, int x2, int y2) {
         return (int) Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
     private boolean onKeyPressed(KeyPressedEvent event) {
         if (event.getKeyCode() == KeyCodes.ENTER) {
-           load();
+            load();
         }
         return false;
+    }
+
+    private static int[] loadArray(String path) {
+        try {
+            return Files.readAllLines(Path.of(path)).stream().mapToInt(Integer::parseInt).toArray();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
 }
