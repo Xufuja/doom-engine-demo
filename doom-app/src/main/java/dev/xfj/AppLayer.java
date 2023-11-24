@@ -166,8 +166,8 @@ public class AppLayer implements Layer {
                 WALLS[i].u = Integer.parseInt(line[5]);
                 WALLS[i].v = Integer.parseInt(line[6]);
                 WALLS[i].shade = Integer.parseInt(line[7]);
-
             }
+
             String[] playerData = lines.get(numberSectors + numberWalls + 3).split(" ");
             player.x = Integer.parseInt(playerData[0]);
             player.y = Integer.parseInt(playerData[1]);
@@ -381,7 +381,7 @@ public class AppLayer implements Layer {
 
         int wt = WALLS[w].wt;
         float ht = 0;
-        float htStep = (float) TEXTURES[wt].w / (float) (x2 - x1);
+        float htStep = (float) TEXTURES[wt].w * WALLS[w].u / (float) (x2 - x1);
 
         int dyb = b2 - b1;
         int dyt = t2 - t1;
@@ -415,7 +415,7 @@ public class AppLayer implements Layer {
             int y2 = (int) (dyt * (x - xs + 0.5f) / dx + t1);
 
             float vt = 0;
-            float vtStep = (float) TEXTURES[wt].h / (float) (y2 - y1);
+            float vtStep = (float) TEXTURES[wt].h * WALLS[w].v / (float) (y2 - y1);
 
             if (y1 < 0) {
                 vt -= vtStep * y1;
@@ -444,11 +444,22 @@ public class AppLayer implements Layer {
                 }
 
                 for (y = y1; y < y2; y++) {
-                    int pixel = (int) (TEXTURES[wt].h - vt - 1) * 3 * TEXTURES[wt].w + (int) ht * 3;
+                    int pixel = (int) (TEXTURES[wt].h - ((int) vt % TEXTURES[wt].h) - 1) * 3 * TEXTURES[wt].w + ((int) ht % TEXTURES[wt].w) * 3;
 
-                    int r = TEXTURES[wt].name[pixel + 0];
-                    int g = TEXTURES[wt].name[pixel + 1];
-                    int b = TEXTURES[wt].name[pixel + 2];
+                    int r = TEXTURES[wt].name[pixel + 0] - WALLS[w].shade / 2;
+                    if (r < 0) {
+                        r = 0;
+                    }
+
+                    int g = TEXTURES[wt].name[pixel + 1] - WALLS[w].shade / 2;
+                    if (g < 0) {
+                        g = 0;
+                    }
+
+                    int b = TEXTURES[wt].name[pixel + 2] - WALLS[w].shade / 2;
+                    if (b < 0) {
+                        b = 0;
+                    }
 
                     drawPixel(x, y, r, g, b);
                     vt += vtStep;
