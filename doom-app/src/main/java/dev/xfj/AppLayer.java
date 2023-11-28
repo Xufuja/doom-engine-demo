@@ -125,6 +125,7 @@ public class AppLayer implements Layer {
 
         clearBackground();
         movePlayer();
+        floors();
         //testTextures();
         draw3D();
     }
@@ -504,6 +505,67 @@ public class AppLayer implements Layer {
         z1 = (int) (z1 + s * (z2 - (z1)));
 
         return new int[]{x1, y1, z1};
+    }
+
+    private void floors() {
+        int x;
+        int y;
+
+        int xo = SCREEN_WIDTH / 2;
+        int yo = SCREEN_HEIGHT / 2;
+        float fov = 200.0f;
+        float lookUpDown = -player.lookAngle * 2;
+
+        if (lookUpDown > SCREEN_HEIGHT) {
+            lookUpDown = SCREEN_HEIGHT;
+        }
+
+        float moveUpDown = player.z / 16.0f;
+
+        if (moveUpDown == 0) {
+            moveUpDown = 0.001f;
+        }
+
+        int ys = -yo;
+        int ye = (int) -lookUpDown;
+
+        if (moveUpDown < 0) {
+            ys = (int) -lookUpDown;
+            ye = (int) (yo + lookUpDown);
+        }
+
+        for (y = ys; y < ye; y++) {
+            for (x = -xo; x < xo; x++) {
+                float z = y + lookUpDown;
+
+                if (z == 0) {
+                    z = 0.0001f;
+                }
+
+                float fx = x / z * moveUpDown;
+                float fy = fov / z * moveUpDown;
+                float rx = fx * SIN[player.angle] - fy * COS[player.angle] + (player.y / 30.0f);
+                float ry = fx * COS[player.angle] + fy * SIN[player.angle] - (player.x / 30.0f);
+
+                if (rx < 0) {
+                    rx = -rx + 1;
+                }
+
+                if (ry < 0) {
+                    ry = -ry + 1;
+                }
+
+                if (rx <= 0 || ry <= 0 || rx > 5 || ry > 5) {
+                    continue;
+                }
+
+                if ((int) rx % 2 == (int) ry % 2) {
+                    drawPixel(x + xo, y + yo, 255, 0, 0);
+                } else {
+                    drawPixel(x + xo, y + yo, 0, 255, 0);
+                }
+            }
+        }
     }
 
     private void testTextures() {
