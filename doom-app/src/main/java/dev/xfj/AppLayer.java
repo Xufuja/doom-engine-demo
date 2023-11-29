@@ -125,7 +125,6 @@ public class AppLayer implements Layer {
 
         clearBackground();
         movePlayer();
-        floors();
         //testTextures();
         draw3D();
     }
@@ -470,16 +469,62 @@ public class AppLayer implements Layer {
             }
 
             if (frontBack == 1) {
+                int xo = SCREEN_WIDTH / 2;
+                int yo = SCREEN_HEIGHT / 2;
+                float fov = 200.0f;
+                int xx2 = x - xo;
+                int wo = 0;
+
                 if (SECTORS[s].surface == 1) {
                     y2 = SECTORS[s].surf[x];
+                    wo = SECTORS[s].z1;
                 }
 
                 if (SECTORS[s].surface == 2) {
                     y1 = SECTORS[s].surf[x];
+                    wo = SECTORS[s].z2;
                 }
 
-                for (y = y1; y < y2; y++) {
-                    drawPixel(x, y, 255, 0, 0);
+                float lookUpDown = -player.lookAngle * 6.2f;
+
+                if (lookUpDown > SCREEN_HEIGHT) {
+                    lookUpDown = SCREEN_HEIGHT;
+                }
+
+                float moveUpDown = (float) (player.z - wo) / (float) yo;
+
+                if (moveUpDown == 0) {
+                    moveUpDown = 0.001f;
+                }
+
+                int ys = y1 - yo;
+                int ye = y2 - yo;
+
+                for (y = ys; y < ye; y++) {
+                    float z = y + lookUpDown;
+
+                    if (z == 0) {
+                        z = 0.0001f;
+                    }
+
+                    float fx = xx2 / z * moveUpDown;
+                    float fy = fov / z * moveUpDown;
+                    float rx = fx * SIN[player.angle] - fy * COS[player.angle] + (player.y / 60.0f);
+                    float ry = fx * COS[player.angle] + fy * SIN[player.angle] - (player.x / 60.0f);
+
+                    if (rx < 0) {
+                        rx = -rx + 1;
+                    }
+
+                    if (ry < 0) {
+                        ry = -ry + 1;
+                    }
+
+                    if ((int) rx % 2 == (int) ry % 2) {
+                        drawPixel(xx2 + xo, y + yo, 255, 0, 0);
+                    } else {
+                        drawPixel(xx2 + xo, y + yo, 0, 255, 0);
+                    }
                 }
             }
         }
@@ -505,67 +550,6 @@ public class AppLayer implements Layer {
         z1 = (int) (z1 + s * (z2 - (z1)));
 
         return new int[]{x1, y1, z1};
-    }
-
-    private void floors() {
-        int x;
-        int y;
-
-        int xo = SCREEN_WIDTH / 2;
-        int yo = SCREEN_HEIGHT / 2;
-        float fov = 200.0f;
-        float lookUpDown = -player.lookAngle * 2;
-
-        if (lookUpDown > SCREEN_HEIGHT) {
-            lookUpDown = SCREEN_HEIGHT;
-        }
-
-        float moveUpDown = player.z / 16.0f;
-
-        if (moveUpDown == 0) {
-            moveUpDown = 0.001f;
-        }
-
-        int ys = -yo;
-        int ye = (int) -lookUpDown;
-
-        if (moveUpDown < 0) {
-            ys = (int) -lookUpDown;
-            ye = (int) (yo + lookUpDown);
-        }
-
-        for (y = ys; y < ye; y++) {
-            for (x = -xo; x < xo; x++) {
-                float z = y + lookUpDown;
-
-                if (z == 0) {
-                    z = 0.0001f;
-                }
-
-                float fx = x / z * moveUpDown;
-                float fy = fov / z * moveUpDown;
-                float rx = fx * SIN[player.angle] - fy * COS[player.angle] + (player.y / 30.0f);
-                float ry = fx * COS[player.angle] + fy * SIN[player.angle] - (player.x / 30.0f);
-
-                if (rx < 0) {
-                    rx = -rx + 1;
-                }
-
-                if (ry < 0) {
-                    ry = -ry + 1;
-                }
-
-                if (rx <= 0 || ry <= 0 || rx > 5 || ry > 5) {
-                    continue;
-                }
-
-                if ((int) rx % 2 == (int) ry % 2) {
-                    drawPixel(x + xo, y + yo, 255, 0, 0);
-                } else {
-                    drawPixel(x + xo, y + yo, 0, 255, 0);
-                }
-            }
-        }
     }
 
     private void testTextures() {
