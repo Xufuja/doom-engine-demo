@@ -474,6 +474,7 @@ public class AppLayer implements Layer {
                 float fov = 200.0f;
                 int xx2 = x - xo;
                 int wo = 0;
+                float tile = SECTORS[s].ss * 7;
 
                 if (SECTORS[s].surface == 1) {
                     y2 = SECTORS[s].surf[x];
@@ -507,10 +508,10 @@ public class AppLayer implements Layer {
                         z = 0.0001f;
                     }
 
-                    float fx = xx2 / z * moveUpDown;
-                    float fy = fov / z * moveUpDown;
-                    float rx = fx * SIN[player.angle] - fy * COS[player.angle] + (player.y / 60.0f);
-                    float ry = fx * COS[player.angle] + fy * SIN[player.angle] - (player.x / 60.0f);
+                    float fx = xx2 / z * moveUpDown * tile;
+                    float fy = fov / z * moveUpDown * tile;
+                    float rx = fx * SIN[player.angle] - fy * COS[player.angle] + (player.y / 60.0f * tile);
+                    float ry = fx * COS[player.angle] + fy * SIN[player.angle] - (player.x / 60.0f * tile);
 
                     if (rx < 0) {
                         rx = -rx + 1;
@@ -520,11 +521,14 @@ public class AppLayer implements Layer {
                         ry = -ry + 1;
                     }
 
-                    if ((int) rx % 2 == (int) ry % 2) {
-                        drawPixel(xx2 + xo, y + yo, 255, 0, 0);
-                    } else {
-                        drawPixel(xx2 + xo, y + yo, 0, 255, 0);
-                    }
+                    int st = SECTORS[s].st;
+                    int pixel = (int) (TEXTURES[wt].h - ((int) ry % TEXTURES[st].h) - 1) * 3 * TEXTURES[wt].w + ((int) rx % TEXTURES[st].w) * 3;
+
+                    int r = TEXTURES[st].name[pixel + 0];
+                    int g = TEXTURES[st].name[pixel + 1];
+                    int b = TEXTURES[st].name[pixel + 2];
+
+                    drawPixel(xx2 + xo, y + yo, r, g, b);
                 }
             }
         }
