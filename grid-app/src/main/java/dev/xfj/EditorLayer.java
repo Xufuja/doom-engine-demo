@@ -20,6 +20,7 @@ import static dev.xfj.application.Application.PIXEL_SCALE;
 import static dev.xfj.application.Application.SCREEN_HEIGHT;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
+import static org.joml.Math.atan2;
 import static org.lwjgl.opengl.GL41.*;
 
 public class EditorLayer implements Layer {
@@ -30,6 +31,7 @@ public class EditorLayer implements Layer {
     private static final Texture[] TEXTURES = new Texture[64];
     private static final int[] T_NUMBERS = loadArray("textures\\tNumbers.txt");
     private static final int[] T_VIEW2D = loadArray("textures\\tView2D.txt");
+
     private static int numberTextures = 19;
     private static int numberSectors = 0;
     private static int numberWalls = 0;
@@ -201,6 +203,7 @@ public class EditorLayer implements Layer {
     private void drawNumber(int nx, int ny, int n) {
         int x;
         int y;
+
         for (y = 0; y < 5; y++) {
             int y2 = ((5 - y - 1) + 5 * n) * 3 * 12;
             for (x = 0; x < 12; x++) {
@@ -586,13 +589,12 @@ public class EditorLayer implements Layer {
         int x = (int) Input.getMousePosition().x;
         int y = (int) Input.getMousePosition().y;
 
-        int s;
-        int w;
+        int s, w;
         //round mouse x,y
         grid.mx = x / PIXEL_SCALE;
         grid.my = SCREEN_HEIGHT - y / PIXEL_SCALE;
         grid.mx = ((grid.mx + 4) >> 3) << 3;
-        grid.my = ((grid.my + 4) >> 3) << 3; //nearest 8th
+        grid.my = ((grid.my + 4) >> 3) << 3; //nearest 8th 
 
         if (event.getMouseButton() == MouseButtonCodes.BUTTON_LEFT) {
             //2D view buttons only
@@ -739,23 +741,24 @@ public class EditorLayer implements Layer {
                             grid.selS = 0;
                         }
                     }
-                    s = grid.selS - 1;
-                    grid.z1 = SECTORS[s].z1; //sector bottom height
-                    grid.z2 = SECTORS[s].z2; //sector top height
-                    grid.st = SECTORS[s].st; //surface texture
-                    grid.ss = SECTORS[s].ss; //surface scale
-                    grid.wt = WALLS[SECTORS[s].ws].wt;
-                    grid.wu = WALLS[SECTORS[s].ws].u;
-                    grid.wv = WALLS[SECTORS[s].ws].v;
+
+                    int ss = grid.selS - 1;
+                    grid.z1 = SECTORS[ss].z1; //sector bottom height
+                    grid.z2 = SECTORS[ss].z2; //sector top height
+                    grid.st = SECTORS[ss].st; //surface texture
+                    grid.ss = SECTORS[ss].ss; //surface scale
+                    grid.wt = WALLS[SECTORS[ss].ws].wt;
+                    grid.wu = WALLS[SECTORS[ss].ws].u;
+                    grid.wv = WALLS[SECTORS[ss].ws].v;
 
                     if (grid.selS == 0) {
                         initGlobals();
-                    } //defaults
+                    } //defaults 
                 }
-
                 //select sector's walls
-                int snw = SECTORS[grid.selS - 1].we - SECTORS[grid.selS - 1].ws; //sector's number of walls
                 if (y > 386 && y < 416) {
+                    int snw = SECTORS[grid.selS - 1].we - SECTORS[grid.selS - 1].ws; //sector's number of walls
+
                     if (x < 610) //select sector wall left
                     {
                         dark = 14;
@@ -782,7 +785,7 @@ public class EditorLayer implements Layer {
                     dark = 16;
                     if (grid.selS > 0) {
                         int d = grid.selS - 1;                             //delete this one
-                        //printf("%i before:%i,%i\n",d, NUMBER_SECTORS,NUMBER_WALLS);
+                        //printf("%i before:%i,%i\n",d, numberSectors,numberWalls);
                         numberWalls -= (SECTORS[d].we - SECTORS[d].ws);                 //first subtract number of walls
                         for (x = d; x < numberSectors; x++) {
                             SECTORS[x] = SECTORS[x + 1];
@@ -790,7 +793,7 @@ public class EditorLayer implements Layer {
                         numberSectors -= 1;                                 //1 less sector
                         grid.selS = 0;
                         grid.selW = 0;                         //deselect
-                        //printf("after:%i,%i\n\n",NUMBER_SECTORS,NUMBER_WALLS);
+                        //printf("after:%i,%i\n\n",numberSectors,numberWalls);
                     }
                 }
 
@@ -812,7 +815,7 @@ public class EditorLayer implements Layer {
                     SECTORS[numberSectors].st = grid.st;
                     SECTORS[numberSectors].ss = grid.ss;
                     WALLS[numberWalls].x1 = grid.mx * grid.scale;
-                    WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1
+                    WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1 
                     WALLS[numberWalls].x2 = grid.mx * grid.scale;
                     WALLS[numberWalls].y2 = grid.my * grid.scale;  //x2,y2
                     WALLS[numberWalls].wt = grid.wt;
@@ -836,8 +839,8 @@ public class EditorLayer implements Layer {
                     //point 2
                     WALLS[numberWalls - 1].x2 = grid.mx * grid.scale;
                     WALLS[numberWalls - 1].y2 = grid.my * grid.scale; //x2,y2
-                    //automatic shading
-                    float ang = (float) Math.atan2(WALLS[numberWalls - 1].y2 - WALLS[numberWalls - 1].y1, WALLS[numberWalls - 1].x2 - WALLS[numberWalls - 1].x1);
+                    //automatic shading 
+                    float ang = atan2(WALLS[numberWalls - 1].y2 - WALLS[numberWalls - 1].y1, WALLS[numberWalls - 1].x2 - WALLS[numberWalls - 1].x1);
                     ang = (float) ((ang * 180) / Math.PI);      //radians to degrees
                     if (ang < 0) {
                         ang += 360;
@@ -863,7 +866,7 @@ public class EditorLayer implements Layer {
                         //init next wall
                         SECTORS[numberSectors - 1].we += 1;                                      //add 1 to wall end
                         WALLS[numberWalls].x1 = grid.mx * grid.scale;
-                        WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1
+                        WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1 
                         WALLS[numberWalls].x2 = grid.mx * grid.scale;
                         WALLS[numberWalls].y2 = grid.my * grid.scale;  //x2,y2
                         WALLS[numberWalls - 1].wt = grid.wt;
@@ -882,7 +885,7 @@ public class EditorLayer implements Layer {
         }
 
         if (grid.addSect == 0 && event.getMouseButton() == MouseButtonCodes.BUTTON_RIGHT) {
-            //move point hold id
+            //move point hold id 
             for (s = 0; s < numberSectors; s++) {
                 for (w = SECTORS[s].ws; w < SECTORS[s].we; w++) {
                     int x1 = WALLS[w].x1, y1 = WALLS[w].y1;
@@ -900,7 +903,6 @@ public class EditorLayer implements Layer {
             }
         }
 
-
         return false;
     }
 
@@ -908,6 +910,7 @@ public class EditorLayer implements Layer {
         if (event.getMouseButton() == MouseButtonCodes.BUTTON_LEFT) {
             dark = 0;
         }
+
         return false;
     }
 
