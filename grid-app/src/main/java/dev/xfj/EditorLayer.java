@@ -530,6 +530,7 @@ public class EditorLayer implements Layer {
             stringBuilder.append(WALLS[i].shade);
             stringBuilder.append("\r\n");
         }
+
         stringBuilder.append("\r\n");
 
         stringBuilder.append(player.x).append(" ");
@@ -572,9 +573,10 @@ public class EditorLayer implements Layer {
                 WALLS[i].u = Integer.parseInt(line[5]);
                 WALLS[i].v = Integer.parseInt(line[6]);
                 WALLS[i].shade = Integer.parseInt(line[7]);
-
             }
+
             String[] playerData = lines.get(numberSectors + numberWalls + 3).split(" ");
+
             player.x = Integer.parseInt(playerData[0]);
             player.y = Integer.parseInt(playerData[1]);
             player.z = Integer.parseInt(playerData[2]);
@@ -725,24 +727,28 @@ public class EditorLayer implements Layer {
                     grid.z2 = 150;
                 }
 
+                System.out.println(grid.selS);
+
                 //select sector
                 if (y > 352 && y < 386) {
                     grid.selW = 0;
                     if (x < 610) {
                         dark = 12;
                         grid.selS -= 1;
+
                         if (grid.selS < 0) {
                             grid.selS = numberSectors;
                         }
                     } else {
                         dark = 13;
                         grid.selS += 1;
+
                         if (grid.selS > numberSectors) {
                             grid.selS = 0;
                         }
                     }
 
-                    int ss = grid.selS - 1;
+                    int ss = grid.selS - 1 < 0 ? 0 : grid.selS - 1;
                     grid.z1 = SECTORS[ss].z1; //sector bottom height
                     grid.z2 = SECTORS[ss].z2; //sector top height
                     grid.st = SECTORS[ss].st; //surface texture
@@ -756,9 +762,8 @@ public class EditorLayer implements Layer {
                     } //defaults 
                 }
                 //select sector's walls
+                int snw =  grid.selS - 1 < 0 ? 0 : SECTORS[grid.selS - 1].we - SECTORS[grid.selS - 1].ws; //sector's number of walls
                 if (y > 386 && y < 416) {
-                    int snw = SECTORS[grid.selS - 1].we - SECTORS[grid.selS - 1].ws; //sector's number of walls
-
                     if (x < 610) //select sector wall left
                     {
                         dark = 14;
@@ -917,8 +922,6 @@ public class EditorLayer implements Layer {
     private boolean onMouseMoved(MouseMovedEvent event) {
         int x = (int) event.getX();
         int y = (int) event.getY();
-
-        System.out.println(x + " " + y);
 
         if (x < 580 && grid.addSect == 0 && grid.move[0] > -1) {
             int Aw = grid.move[0];
