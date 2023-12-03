@@ -1,4 +1,4 @@
-package dev.xfj;
+package dev.xfj.game;
 
 public class Texture {
     public int w;

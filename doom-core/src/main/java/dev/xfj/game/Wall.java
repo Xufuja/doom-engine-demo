@@ -1,4 +1,4 @@
-package dev.xfj;
+package dev.xfj.game;
 
 public class Wall {
     public int x1;

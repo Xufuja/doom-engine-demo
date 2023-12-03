@@ -6,6 +6,10 @@ import dev.xfj.events.EventDispatcher;
 import dev.xfj.events.mouse.MouseButtonPressedEvent;
 import dev.xfj.events.mouse.MouseButtonReleasedEvent;
 import dev.xfj.events.mouse.MouseMovedEvent;
+import dev.xfj.game.Player;
+import dev.xfj.game.Sector;
+import dev.xfj.game.Texture;
+import dev.xfj.game.Wall;
 import dev.xfj.input.Input;
 import dev.xfj.input.KeyCodes;
 import dev.xfj.input.MouseButtonCodes;
@@ -159,8 +163,7 @@ public class EditorLayer implements Layer {
         eventDispatcher.dispatch(MouseMovedEvent.class, this::onMouseMoved);
     }
 
-    private void initGlobals()           //define grid globals
-    {
+    private void initGlobals() { //define grid globals
         grid.scale = 4;                //scale down grid
         grid.selS = 0;
         grid.selW = 0;       //select sector, walls
@@ -727,8 +730,6 @@ public class EditorLayer implements Layer {
                     grid.z2 = 150;
                 }
 
-                System.out.println(grid.selS);
-
                 //select sector
                 if (y > 352 && y < 386) {
                     grid.selW = 0;
@@ -762,7 +763,7 @@ public class EditorLayer implements Layer {
                     } //defaults 
                 }
                 //select sector's walls
-                int snw =  grid.selS - 1 < 0 ? 0 : SECTORS[grid.selS - 1].we - SECTORS[grid.selS - 1].ws; //sector's number of walls
+                int snw = grid.selS - 1 < 0 ? 0 : SECTORS[grid.selS - 1].we - SECTORS[grid.selS - 1].ws; //sector's number of walls
                 if (y > 386 && y < 416) {
                     if (x < 610) //select sector wall left
                     {
@@ -771,8 +772,7 @@ public class EditorLayer implements Layer {
                         if (grid.selW < 0) {
                             grid.selW = snw;
                         }
-                    } else //select sector wall right
-                    {
+                    } else { //select sector wall right
                         dark = 15;
                         grid.selW += 1;
                         if (grid.selW > snw) {
@@ -810,8 +810,7 @@ public class EditorLayer implements Layer {
             }
 
             //clicked on grid
-            else {
-                //init new sector
+            else { //init new sector
                 if (grid.addSect == 1) {
                     SECTORS[numberSectors].ws = numberWalls;                                   //clear wall start
                     SECTORS[numberSectors].we = numberWalls + 1;                                 //add 1 to wall end
@@ -820,7 +819,7 @@ public class EditorLayer implements Layer {
                     SECTORS[numberSectors].st = grid.st;
                     SECTORS[numberSectors].ss = grid.ss;
                     WALLS[numberWalls].x1 = grid.mx * grid.scale;
-                    WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1 
+                    WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1
                     WALLS[numberWalls].x2 = grid.mx * grid.scale;
                     WALLS[numberWalls].y2 = grid.my * grid.scale;  //x2,y2
                     WALLS[numberWalls].wt = grid.wt;
@@ -867,8 +866,7 @@ public class EditorLayer implements Layer {
                         grid.addSect = 0;
                     }
                     //not closed, add new wall
-                    else {
-                        //init next wall
+                    else {  //init next wall
                         SECTORS[numberSectors - 1].we += 1;                                      //add 1 to wall end
                         WALLS[numberWalls].x1 = grid.mx * grid.scale;
                         WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1 

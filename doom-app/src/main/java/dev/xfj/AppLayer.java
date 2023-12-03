@@ -4,6 +4,10 @@ import dev.xfj.application.Application;
 import dev.xfj.events.Event;
 import dev.xfj.events.EventDispatcher;
 import dev.xfj.events.key.KeyPressedEvent;
+import dev.xfj.game.Player;
+import dev.xfj.game.Sector;
+import dev.xfj.game.Texture;
+import dev.xfj.game.Wall;
 import dev.xfj.input.Input;
 import dev.xfj.input.KeyCodes;
 
@@ -146,8 +150,8 @@ public class AppLayer implements Layer {
 
             for (int i = 0; i < numberSectors; i++) {
                 String[] line = lines.get(i + 1).split(" ");
-                SECTORS[i].wallStart = Integer.parseInt(line[0]);
-                SECTORS[i].wallEnd = Integer.parseInt(line[1]);
+                SECTORS[i].ws = Integer.parseInt(line[0]);
+                SECTORS[i].we = Integer.parseInt(line[1]);
                 SECTORS[i].z1 = Integer.parseInt(line[2]);
                 SECTORS[i].z2 = Integer.parseInt(line[3]);
                 SECTORS[i].st = Integer.parseInt(line[4]);
@@ -293,7 +297,7 @@ public class AppLayer implements Layer {
             }
 
             for (frontBack = 0; frontBack < cycles; frontBack++) {
-                for (w = SECTORS[s].wallStart; w < SECTORS[s].wallEnd; w++) {
+                for (w = SECTORS[s].ws; w < SECTORS[s].we; w++) {
                     int x1 = WALLS[w].x1 - player.x;
                     int y1 = WALLS[w].y1 - player.y;
                     int x2 = WALLS[w].x2 - player.x;
@@ -368,8 +372,8 @@ public class AppLayer implements Layer {
                     drawWall(worldX[0], worldX[1], worldY[0], worldY[1], worldY[2], worldY[3], s, w, frontBack);
                 }
 
-                if ((SECTORS[s].wallEnd - SECTORS[s].wallStart) != 0) {
-                    SECTORS[s].distance /= (SECTORS[s].wallEnd - SECTORS[s].wallStart);
+                if ((SECTORS[s].we - SECTORS[s].ws) != 0) {
+                    SECTORS[s].distance /= (SECTORS[s].we - SECTORS[s].ws);
                 }
             }
         }
