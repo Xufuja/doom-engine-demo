@@ -150,10 +150,10 @@ public class AppLayer implements Layer {
 
             for (int i = 0; i < numberSectors; i++) {
                 String[] line = lines.get(i + 1).split(" ");
-                SECTORS[i].ws = Integer.parseInt(line[0]);
-                SECTORS[i].we = Integer.parseInt(line[1]);
-                SECTORS[i].z1 = Integer.parseInt(line[2]);
-                SECTORS[i].z2 = Integer.parseInt(line[3]);
+                SECTORS[i].wallStart = Integer.parseInt(line[0]);
+                SECTORS[i].wallEnd = Integer.parseInt(line[1]);
+                SECTORS[i].top = Integer.parseInt(line[2]);
+                SECTORS[i].bottom = Integer.parseInt(line[3]);
                 SECTORS[i].st = Integer.parseInt(line[4]);
                 SECTORS[i].ss = Integer.parseInt(line[5]);
             }
@@ -166,7 +166,7 @@ public class AppLayer implements Layer {
                 WALLS[i].y1 = Integer.parseInt(line[1]);
                 WALLS[i].x2 = Integer.parseInt(line[2]);
                 WALLS[i].y2 = Integer.parseInt(line[3]);
-                WALLS[i].wt = Integer.parseInt(line[4]);
+                WALLS[i].wallTexture = Integer.parseInt(line[4]);
                 WALLS[i].u = Integer.parseInt(line[5]);
                 WALLS[i].v = Integer.parseInt(line[6]);
                 WALLS[i].shade = Integer.parseInt(line[7]);
@@ -277,14 +277,14 @@ public class AppLayer implements Layer {
 
         for (s = 0; s < numberSectors; s++) {
             SECTORS[s].distance = 0;
-            if (player.z < SECTORS[s].z1) {
+            if (player.z < SECTORS[s].top) {
                 SECTORS[s].surface = 1;
                 cycles = 2;
 
                 for (x = 0; x < SCREEN_WIDTH; x++) {
                     SECTORS[s].surf[x] = SCREEN_HEIGHT;
                 }
-            } else if (player.z > SECTORS[s].z2) {
+            } else if (player.z > SECTORS[s].bottom) {
                 SECTORS[s].surface = 2;
                 cycles = 2;
 
@@ -297,7 +297,7 @@ public class AppLayer implements Layer {
             }
 
             for (frontBack = 0; frontBack < cycles; frontBack++) {
-                for (w = SECTORS[s].ws; w < SECTORS[s].we; w++) {
+                for (w = SECTORS[s].wallStart; w < SECTORS[s].wallEnd; w++) {
                     int x1 = WALLS[w].x1 - player.x;
                     int y1 = WALLS[w].y1 - player.y;
                     int x2 = WALLS[w].x2 - player.x;
@@ -324,10 +324,10 @@ public class AppLayer implements Layer {
 
                     SECTORS[s].distance += distance(0, 0, (worldX[0] + worldX[1]) / 2, (worldY[0] + worldY[1]) / 2);
 
-                    worldZ[0] = (int) (SECTORS[s].z1 - player.z + ((player.lookAngle * worldY[0])) / 32.0f);
-                    worldZ[1] = (int) (SECTORS[s].z1 - player.z + ((player.lookAngle * worldY[1])) / 32.0f);
-                    worldZ[2] = (int) (SECTORS[s].z2 - player.z + ((player.lookAngle * worldY[0])) / 32.0f);
-                    worldZ[3] = (int) (SECTORS[s].z2 - player.z + ((player.lookAngle * worldY[1])) / 32.0f);
+                    worldZ[0] = (int) (SECTORS[s].top - player.z + ((player.lookAngle * worldY[0])) / 32.0f);
+                    worldZ[1] = (int) (SECTORS[s].top - player.z + ((player.lookAngle * worldY[1])) / 32.0f);
+                    worldZ[2] = (int) (SECTORS[s].bottom - player.z + ((player.lookAngle * worldY[0])) / 32.0f);
+                    worldZ[3] = (int) (SECTORS[s].bottom - player.z + ((player.lookAngle * worldY[1])) / 32.0f);
 
                     if (worldY[0] < 1 && worldY[1] < 1) {
                         continue;
@@ -372,8 +372,8 @@ public class AppLayer implements Layer {
                     drawWall(worldX[0], worldX[1], worldY[0], worldY[1], worldY[2], worldY[3], s, w, frontBack);
                 }
 
-                if ((SECTORS[s].we - SECTORS[s].ws) != 0) {
-                    SECTORS[s].distance /= (SECTORS[s].we - SECTORS[s].ws);
+                if ((SECTORS[s].wallEnd - SECTORS[s].wallStart) != 0) {
+                    SECTORS[s].distance /= (SECTORS[s].wallEnd - SECTORS[s].wallStart);
                 }
             }
         }
@@ -383,7 +383,7 @@ public class AppLayer implements Layer {
         int x;
         int y;
 
-        int wt = WALLS[w].wt;
+        int wt = WALLS[w].wallTexture;
         float ht = 0;
         float htStep = (float) TEXTURES[wt].w * WALLS[w].u / (float) (x2 - x1);
 
@@ -482,12 +482,12 @@ public class AppLayer implements Layer {
 
                 if (SECTORS[s].surface == 1) {
                     y2 = SECTORS[s].surf[x];
-                    wo = SECTORS[s].z1;
+                    wo = SECTORS[s].top;
                 }
 
                 if (SECTORS[s].surface == 2) {
                     y1 = SECTORS[s].surf[x];
-                    wo = SECTORS[s].z2;
+                    wo = SECTORS[s].bottom;
                 }
 
                 float lookUpDown = -player.lookAngle * 6.2f;

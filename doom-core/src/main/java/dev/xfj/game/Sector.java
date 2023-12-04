@@ -3,10 +3,10 @@ package dev.xfj.game;
 import static dev.xfj.application.Application.*;
 
 public class Sector {
-    public int ws;
-    public int we;
-    public int z1;
-    public int z2;
+    public int wallStart;
+    public int wallEnd;
+    public int top;
+    public int bottom;
     public int distance;
     public int st;
     public int ss;

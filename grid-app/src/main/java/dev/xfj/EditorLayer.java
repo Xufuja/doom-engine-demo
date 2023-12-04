@@ -297,21 +297,21 @@ public class EditorLayer implements Layer {
 
         //draw sectors
         for (s = 0; s < numberSectors; s++) {
-            for (w = SECTORS[s].ws; w < SECTORS[s].we; w++) {
+            for (w = SECTORS[s].wallStart; w < SECTORS[s].wallEnd; w++) {
                 if (s == grid.selS - 1) //if this sector is selected
                 {
                     //set sector to globals
-                    SECTORS[grid.selS - 1].z1 = grid.z1;
-                    SECTORS[grid.selS - 1].z2 = grid.z2;
+                    SECTORS[grid.selS - 1].top = grid.z1;
+                    SECTORS[grid.selS - 1].bottom = grid.z2;
                     SECTORS[grid.selS - 1].st = grid.st;
                     SECTORS[grid.selS - 1].ss = grid.ss;
                     //yellow select
                     if (grid.selW == 0) {
                         c = 80;
                     } //all walls yellow
-                    else if (grid.selW + SECTORS[s].ws - 1 == w) {
+                    else if (grid.selW + SECTORS[s].wallStart - 1 == w) {
                         c = 80;
-                        WALLS[w].wt = grid.wt;
+                        WALLS[w].wallTexture = grid.wt;
                         WALLS[w].u = grid.wu;
                         WALLS[w].v = grid.wv;
                     } //one wall selected
@@ -511,10 +511,10 @@ public class EditorLayer implements Layer {
         stringBuilder.append(numberSectors).append("\r\n");
 
         for (int i = 0; i < numberSectors; i++) {
-            stringBuilder.append(SECTORS[i].ws).append(" ");
-            stringBuilder.append(SECTORS[i].we).append(" ");
-            stringBuilder.append(SECTORS[i].z1).append(" ");
-            stringBuilder.append(SECTORS[i].z2).append(" ");
+            stringBuilder.append(SECTORS[i].wallStart).append(" ");
+            stringBuilder.append(SECTORS[i].wallEnd).append(" ");
+            stringBuilder.append(SECTORS[i].top).append(" ");
+            stringBuilder.append(SECTORS[i].bottom).append(" ");
             stringBuilder.append(SECTORS[i].st).append(" ");
             stringBuilder.append(SECTORS[i].ss);
             stringBuilder.append("\r\n");
@@ -527,7 +527,7 @@ public class EditorLayer implements Layer {
             stringBuilder.append(WALLS[i].y1).append(" ");
             stringBuilder.append(WALLS[i].x2).append(" ");
             stringBuilder.append(WALLS[i].y2).append(" ");
-            stringBuilder.append(WALLS[i].wt).append(" ");
+            stringBuilder.append(WALLS[i].wallTexture).append(" ");
             stringBuilder.append(WALLS[i].u).append(" ");
             stringBuilder.append(WALLS[i].v).append(" ");
             stringBuilder.append(WALLS[i].shade);
@@ -556,10 +556,10 @@ public class EditorLayer implements Layer {
 
             for (int i = 0; i < numberSectors; i++) {
                 String[] line = lines.get(i + 1).split(" ");
-                SECTORS[i].ws = Integer.parseInt(line[0]);
-                SECTORS[i].we = Integer.parseInt(line[1]);
-                SECTORS[i].z1 = Integer.parseInt(line[2]);
-                SECTORS[i].z2 = Integer.parseInt(line[3]);
+                SECTORS[i].wallStart = Integer.parseInt(line[0]);
+                SECTORS[i].wallEnd = Integer.parseInt(line[1]);
+                SECTORS[i].top = Integer.parseInt(line[2]);
+                SECTORS[i].bottom = Integer.parseInt(line[3]);
                 SECTORS[i].st = Integer.parseInt(line[4]);
                 SECTORS[i].ss = Integer.parseInt(line[5]);
             }
@@ -572,7 +572,7 @@ public class EditorLayer implements Layer {
                 WALLS[i].y1 = Integer.parseInt(line[1]);
                 WALLS[i].x2 = Integer.parseInt(line[2]);
                 WALLS[i].y2 = Integer.parseInt(line[3]);
-                WALLS[i].wt = Integer.parseInt(line[4]);
+                WALLS[i].wallTexture = Integer.parseInt(line[4]);
                 WALLS[i].u = Integer.parseInt(line[5]);
                 WALLS[i].v = Integer.parseInt(line[6]);
                 WALLS[i].shade = Integer.parseInt(line[7]);
@@ -750,20 +750,20 @@ public class EditorLayer implements Layer {
                     }
 
                     int ss = grid.selS - 1 < 0 ? 0 : grid.selS - 1;
-                    grid.z1 = SECTORS[ss].z1; //sector bottom height
-                    grid.z2 = SECTORS[ss].z2; //sector top height
+                    grid.z1 = SECTORS[ss].top; //sector bottom height
+                    grid.z2 = SECTORS[ss].bottom; //sector top height
                     grid.st = SECTORS[ss].st; //surface texture
                     grid.ss = SECTORS[ss].ss; //surface scale
-                    grid.wt = WALLS[SECTORS[ss].ws].wt;
-                    grid.wu = WALLS[SECTORS[ss].ws].u;
-                    grid.wv = WALLS[SECTORS[ss].ws].v;
+                    grid.wt = WALLS[SECTORS[ss].wallStart].wallTexture;
+                    grid.wu = WALLS[SECTORS[ss].wallStart].u;
+                    grid.wv = WALLS[SECTORS[ss].wallStart].v;
 
                     if (grid.selS == 0) {
                         initGlobals();
                     } //defaults 
                 }
                 //select sector's walls
-                int snw = grid.selS - 1 < 0 ? 0 : SECTORS[grid.selS - 1].we - SECTORS[grid.selS - 1].ws; //sector's number of walls
+                int snw = grid.selS - 1 < 0 ? 0 : SECTORS[grid.selS - 1].wallEnd - SECTORS[grid.selS - 1].wallStart; //sector's number of walls
                 if (y > 386 && y < 416) {
                     if (x < 610) //select sector wall left
                     {
@@ -780,9 +780,9 @@ public class EditorLayer implements Layer {
                         }
                     }
                     if (grid.selW > 0) {
-                        grid.wt = WALLS[SECTORS[grid.selS - 1].ws + grid.selW - 1].wt; //printf("ws,%i,%i\n",grid.wt, 1 );
-                        grid.wu = WALLS[SECTORS[grid.selS - 1].ws + grid.selW - 1].u;
-                        grid.wv = WALLS[SECTORS[grid.selS - 1].ws + grid.selW - 1].v;
+                        grid.wt = WALLS[SECTORS[grid.selS - 1].wallStart + grid.selW - 1].wallTexture; //printf("ws,%i,%i\n",grid.wt, 1 );
+                        grid.wu = WALLS[SECTORS[grid.selS - 1].wallStart + grid.selW - 1].u;
+                        grid.wv = WALLS[SECTORS[grid.selS - 1].wallStart + grid.selW - 1].v;
                     }
                 }
                 //delete
@@ -791,7 +791,7 @@ public class EditorLayer implements Layer {
                     if (grid.selS > 0) {
                         int d = grid.selS - 1;                             //delete this one
                         //printf("%i before:%i,%i\n",d, numberSectors,numberWalls);
-                        numberWalls -= (SECTORS[d].we - SECTORS[d].ws);                 //first subtract number of walls
+                        numberWalls -= (SECTORS[d].wallEnd - SECTORS[d].wallStart);                 //first subtract number of walls
                         for (x = d; x < numberSectors; x++) {
                             SECTORS[x] = SECTORS[x + 1];
                         }       //remove from array
@@ -812,17 +812,17 @@ public class EditorLayer implements Layer {
             //clicked on grid
             else { //init new sector
                 if (grid.addSect == 1) {
-                    SECTORS[numberSectors].ws = numberWalls;                                   //clear wall start
-                    SECTORS[numberSectors].we = numberWalls + 1;                                 //add 1 to wall end
-                    SECTORS[numberSectors].z1 = grid.z1;
-                    SECTORS[numberSectors].z2 = grid.z2;
+                    SECTORS[numberSectors].wallStart = numberWalls;                                   //clear wall start
+                    SECTORS[numberSectors].wallEnd = numberWalls + 1;                                 //add 1 to wall end
+                    SECTORS[numberSectors].top = grid.z1;
+                    SECTORS[numberSectors].bottom = grid.z2;
                     SECTORS[numberSectors].st = grid.st;
                     SECTORS[numberSectors].ss = grid.ss;
                     WALLS[numberWalls].x1 = grid.mx * grid.scale;
                     WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1
                     WALLS[numberWalls].x2 = grid.mx * grid.scale;
                     WALLS[numberWalls].y2 = grid.my * grid.scale;  //x2,y2
-                    WALLS[numberWalls].wt = grid.wt;
+                    WALLS[numberWalls].wallTexture = grid.wt;
                     WALLS[numberWalls].u = grid.wu;
                     WALLS[numberWalls].v = grid.wv;
                     numberWalls += 1;                                              //add 1 wall
@@ -832,7 +832,7 @@ public class EditorLayer implements Layer {
 
                 //add point 2
                 else if (grid.addSect == 3) {
-                    if (SECTORS[numberSectors - 1].ws == numberWalls - 1 && grid.mx * grid.scale <= WALLS[SECTORS[numberSectors - 1].ws].x1) {
+                    if (SECTORS[numberSectors - 1].wallStart == numberWalls - 1 && grid.mx * grid.scale <= WALLS[SECTORS[numberSectors - 1].wallStart].x1) {
                         numberWalls -= 1;
                         numberSectors -= 1;
                         grid.addSect = 0;
@@ -859,20 +859,20 @@ public class EditorLayer implements Layer {
                     WALLS[numberWalls - 1].shade = shade;
 
                     //check if sector is closed
-                    if (WALLS[numberWalls - 1].x2 == WALLS[SECTORS[numberSectors - 1].ws].x1 && WALLS[numberWalls - 1].y2 == WALLS[SECTORS[numberSectors - 1].ws].y1) {
-                        WALLS[numberWalls - 1].wt = grid.wt;
+                    if (WALLS[numberWalls - 1].x2 == WALLS[SECTORS[numberSectors - 1].wallStart].x1 && WALLS[numberWalls - 1].y2 == WALLS[SECTORS[numberSectors - 1].wallStart].y1) {
+                        WALLS[numberWalls - 1].wallTexture = grid.wt;
                         WALLS[numberWalls - 1].u = grid.wu;
                         WALLS[numberWalls - 1].v = grid.wv;
                         grid.addSect = 0;
                     }
                     //not closed, add new wall
                     else {  //init next wall
-                        SECTORS[numberSectors - 1].we += 1;                                      //add 1 to wall end
+                        SECTORS[numberSectors - 1].wallEnd += 1;                                      //add 1 to wall end
                         WALLS[numberWalls].x1 = grid.mx * grid.scale;
                         WALLS[numberWalls].y1 = grid.my * grid.scale;  //x1,y1 
                         WALLS[numberWalls].x2 = grid.mx * grid.scale;
                         WALLS[numberWalls].y2 = grid.my * grid.scale;  //x2,y2
-                        WALLS[numberWalls - 1].wt = grid.wt;
+                        WALLS[numberWalls - 1].wallTexture = grid.wt;
                         WALLS[numberWalls - 1].u = grid.wu;
                         WALLS[numberWalls - 1].v = grid.wv;
                         WALLS[numberWalls].shade = 0;
@@ -890,7 +890,7 @@ public class EditorLayer implements Layer {
         if (grid.addSect == 0 && event.getMouseButton() == MouseButtonCodes.BUTTON_RIGHT) {
             //move point hold id 
             for (s = 0; s < numberSectors; s++) {
-                for (w = SECTORS[s].ws; w < SECTORS[s].we; w++) {
+                for (w = SECTORS[s].wallStart; w < SECTORS[s].wallEnd; w++) {
                     int x1 = WALLS[w].x1, y1 = WALLS[w].y1;
                     int x2 = WALLS[w].x2, y2 = WALLS[w].y2;
                     int mx = grid.mx * grid.scale, my = grid.my * grid.scale;

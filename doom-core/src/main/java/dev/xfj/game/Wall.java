@@ -5,7 +5,7 @@ public class Wall {
     public int y1;
     public int x2;
     public int y2;
-    public int wt;
+    public int wallTexture;
     public int u;
     public int v;
     public int shade;
